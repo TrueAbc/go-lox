@@ -1,4 +1,4 @@
-package main
+package Token
 
 // 字符的类型, 词法解析的时候识别的类型
 

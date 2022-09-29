@@ -1,6 +1,9 @@
-package main
+package Token
 
-import "strconv"
+import (
+	"github.com/trueabc/lox/Logger"
+	"strconv"
+)
 
 var KEY_WORDS = map[string]TokenType{
 	"and":    AND,
@@ -42,7 +45,7 @@ func (s *Scanner) isAtEnd() bool {
 	return s.current >= len(s.source)
 }
 
-func (s *Scanner) scanTokens() []*Token {
+func (s *Scanner) ScanTokens() []*Token {
 	for !s.isAtEnd() {
 		s.start = s.current
 		s.scanToken()
@@ -129,7 +132,7 @@ func (s *Scanner) scanToken() {
 		} else if s.isAlpha(n) {
 			s.identifier()
 		} else {
-			Errorf("%d Unexpected character.", s.line)
+			Logger.Errorf("%d Unexpected character.", s.line)
 		}
 	}
 }
@@ -188,7 +191,7 @@ func (s *Scanner) string() {
 	}
 
 	if s.isAtEnd() {
-		Errorf("%d unterminated string", s.line)
+		Logger.Errorf("%d unterminated string", s.line)
 		return
 	}
 

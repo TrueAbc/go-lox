@@ -1,4 +1,4 @@
-package main
+package Logger
 
 import (
 	"io"

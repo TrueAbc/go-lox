@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/trueabc/lox/Token"
 	"os"
 	"path/filepath"
 )
@@ -57,8 +58,8 @@ func runPrompt() {
 
 // 读取source内容并执行
 func run(source string) {
-	scanner := NewScanner(source)
-	tokens := scanner.scanTokens()
+	scanner := Token.NewScanner(source)
+	tokens := scanner.ScanTokens()
 	for _, t := range tokens {
 		fmt.Println(t)
 	}
