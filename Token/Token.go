@@ -5,23 +5,23 @@ import (
 )
 
 type Token struct {
-	tType   TokenType
+	TType   TokenType
 	Lexeme  string      // 词位
-	literal interface{} // 字面量
-	line    int         // token 所在的行
+	Literal interface{} // 字面量
+	Line    int         // token 所在的行
 }
 
 func (t *Token) String() string {
-	return fmt.Sprintf("type is: %v, lexeme value: %s,  literal is: %v, line number: %d",
-		t.tType, t.Lexeme, t.literal, t.line)
+	return fmt.Sprintf("type is: %v, lexeme value: %s,  Literal is: %v, Line number: %d",
+		t.TType, t.Lexeme, t.Literal, t.Line)
 }
 
 func NewToken(tType TokenType, lexeme string, literal interface{}, line int) *Token {
 	t := &Token{
-		tType:   tType,
+		TType:   tType,
 		Lexeme:  lexeme,
-		literal: literal,
-		line:    line,
+		Literal: literal,
+		Line:    line,
 	}
 	return t
 }

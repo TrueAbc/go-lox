@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/trueabc/lox/Syntax"
 	"github.com/trueabc/lox/Token"
 	"os"
 	"path/filepath"
@@ -43,7 +44,6 @@ func runPrompt() {
 	reader := bufio.NewScanner(os.Stdin)
 	fmt.Print("> ")
 	for reader.Scan() {
-		fmt.Print("> ")
 		// scan a line and text get result
 		text := reader.Text()
 
@@ -53,6 +53,7 @@ func runPrompt() {
 		} else {
 			break
 		}
+		fmt.Print("> ")
 	}
 }
 
@@ -60,17 +61,16 @@ func runPrompt() {
 func run(source string) {
 	scanner := Token.NewScanner(source)
 	tokens := scanner.ScanTokens()
-	for _, t := range tokens {
-		fmt.Println(t)
+
+	parser := Syntax.NewParser(tokens)
+
+	res := parser.Parse()
+	if Token.HadError {
+		return
 	}
+	fmt.Println(Syntax.AstPrinter{}.Print(res))
 }
 
 func errorHandle(line int, message string) {
 
-}
-
-func report(line int, where, message string) {
-	hadError = true
-	err := fmt.Errorf("[line %d ] Error %v : %v", line, where, message)
-	fmt.Println(err)
 }
