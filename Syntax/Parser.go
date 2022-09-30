@@ -1,6 +1,7 @@
 package Syntax
 
 import (
+	"github.com/trueabc/lox/Errors"
 	"github.com/trueabc/lox/Logger"
 	"github.com/trueabc/lox/Token"
 )
@@ -152,7 +153,7 @@ func (p *Parser) consume(tokenType Token.TokenType, mess string) *Token.Token {
 }
 
 func (p *Parser) error(token *Token.Token, mess string) interface{} {
-	data := Token.LoxError(token, mess)
+	data := Errors.LoxError(token, mess)
 	return NewParseError(data)
 }
 

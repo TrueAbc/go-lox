@@ -1,10 +1,33 @@
 package Syntax
 
 import (
+	"fmt"
+	"github.com/trueabc/lox/Errors"
+	"github.com/trueabc/lox/Logger"
 	"github.com/trueabc/lox/Token"
 )
 
 type Interpreter struct {
+}
+
+func NewInterpreter() Interpreter {
+	return Interpreter{}
+}
+
+func (i Interpreter) Interpret(expression Expr) interface{} {
+	defer func() {
+		if r := recover(); r != nil {
+			switch r.(type) {
+			case *RuntimeError:
+				err := r.(*RuntimeError)
+				Errors.LoxRuntimeError(err.Token, err.Content)
+			}
+			Logger.Errorf("%v", r)
+		}
+	}()
+	eval := i.evaluate(expression)
+	fmt.Println(eval)
+	return eval
 }
 
 func (i Interpreter) VisitBinaryExpr(binary Expr) interface{} {
@@ -13,11 +36,14 @@ func (i Interpreter) VisitBinaryExpr(binary Expr) interface{} {
 	right := i.evaluate(class.right)
 	switch class.operator.TType {
 	case Token.MINUS:
+		i.checkNumberOperands(class.operator, left, right)
 		return left.(float64) - right.(float64)
 	case Token.STAR:
+		i.checkNumberOperands(class.operator, left, right)
 		return left.(float64) * right.(float64)
 	case Token.SLASH:
 		// 分母为0
+		i.checkNumberOperands(class.operator, left, right)
 		return left.(float64) / right.(float64)
 	case Token.PLUS:
 		// 字符串拼接和数字相加
@@ -26,16 +52,23 @@ func (i Interpreter) VisitBinaryExpr(binary Expr) interface{} {
 		if ok1 && ok2 {
 			return l1 + r1
 		}
-		s1 := left.(string)
-		s2 := right.(string)
-		return s1 + s2
+		s1, ok1 := left.(string)
+		s2, ok2 := right.(string)
+		if ok1 && ok2 {
+			return s1 + s2
+		}
+		panic(NewRuntimeError(class.operator, "Operands must be two numbers or strings."))
 	case Token.GREATER:
+		i.checkNumberOperands(class.operator, left, right)
 		return left.(float64) > right.(float64)
 	case Token.GREATER_EQUAL:
+		i.checkNumberOperands(class.operator, left, right)
 		return left.(float64) >= right.(float64)
 	case Token.LESS:
+		i.checkNumberOperands(class.operator, left, right)
 		return left.(float64) < right.(float64)
 	case Token.LESS_EQUAL:
+		i.checkNumberOperands(class.operator, left, right)
 		return left.(float64) <= right.(float64)
 
 	case Token.BANG_EQUAL:
@@ -62,6 +95,7 @@ func (i Interpreter) VisitUnaryExpr(unary Expr) interface{} {
 	right := i.evaluate(class.right)
 	switch class.operator.TType {
 	case Token.MINUS:
+		i.checkNumberOperand(class.operator, right)
 		return -(right.(float64))
 	case Token.BANG:
 		return !i.isTruthy(right)
@@ -92,4 +126,35 @@ func (i Interpreter) isEqual(left, right interface{}) bool {
 		return false
 	}
 	return left == right
+}
+
+func (i Interpreter) checkNumberOperand(operator *Token.Token, operand interface{}) {
+	switch operand.(type) {
+	case float64:
+		return
+	default:
+		panic(NewRuntimeError(operator, "operand must be number. "))
+	}
+}
+
+func (i Interpreter) checkNumberOperands(operator *Token.Token, left, right interface{}) {
+	_, ok1 := left.(float64)
+	_, ok2 := right.(float64)
+	if ok1 && ok2 {
+		return
+	}
+	panic(NewRuntimeError(operator, "operand must be number."))
+}
+
+type RuntimeError struct {
+	Token   *Token.Token
+	Content string
+}
+
+func (re *RuntimeError) Error() string {
+	return re.Content
+}
+
+func NewRuntimeError(token *Token.Token, content string) *RuntimeError {
+	return &RuntimeError{Token: token, Content: content}
 }

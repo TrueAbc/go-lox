@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/trueabc/lox/Errors"
 	"github.com/trueabc/lox/Syntax"
 	"github.com/trueabc/lox/Token"
 	"os"
@@ -63,14 +64,17 @@ func run(source string) {
 	tokens := scanner.ScanTokens()
 
 	parser := Syntax.NewParser(tokens)
-
+	// res is an ast
 	res := parser.Parse()
-	if Token.HadError {
+
+	interpreter := Syntax.NewInterpreter()
+	interpreter.Interpret(res)
+
+	if Errors.HadError {
 		return
 	}
-	fmt.Println(Syntax.AstPrinter{}.Print(res))
-}
-
-func errorHandle(line int, message string) {
-
+	if Errors.HadRunTimeError {
+		return
+	}
+	//fmt.Println(Syntax.AstPrinter{}.Print(res))
 }

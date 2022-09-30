@@ -1,11 +1,13 @@
-package Token
+package Errors
 
 import (
 	"fmt"
 	"github.com/trueabc/lox/Logger"
+	"github.com/trueabc/lox/Token"
 )
 
 var HadError = false
+var HadRunTimeError = false
 
 func report(line int, where, message string) string {
 	HadError = true
@@ -14,10 +16,16 @@ func report(line int, where, message string) string {
 	return data
 }
 
-func LoxError(token *Token, mess string) string {
-	if token.TType == EOF {
+func LoxError(token *Token.Token, mess string) string {
+	if token.TType == Token.EOF {
 		return report(token.Line, " at end", mess)
 	} else {
 		return report(token.Line, "at '"+token.Lexeme+"'", mess)
 	}
+}
+
+func LoxRuntimeError(token *Token.Token, mess string) {
+	HadRunTimeError = true
+	report(token.Line, "at '"+token.Lexeme+"'",
+		mess)
 }
