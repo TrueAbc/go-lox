@@ -8,7 +8,7 @@ import (
 )
 
 type Interpreter struct {
-	env *Environment
+	env *Environment // 包含状态了, 需要是全局变量了
 }
 
 func (i *Interpreter) VisitVariableStmt(variable Stmt) interface{} {
