@@ -12,6 +12,8 @@ import (
 
 var hadError = false
 
+var interpreter *Syntax.Interpreter = Syntax.NewInterpreter()
+
 func main() {
 	args := os.Args
 	if len(args) > 2 {
@@ -67,7 +69,6 @@ func run(source string) {
 	// res is an ast
 	res := parser.Parse()
 
-	interpreter := Syntax.NewInterpreter()
 	interpreter.Interpret(res)
 
 	if Errors.HadError {

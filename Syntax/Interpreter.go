@@ -8,37 +8,43 @@ import (
 )
 
 type Interpreter struct {
+	env *Environment
 }
 
-func (i Interpreter) VisitVariableStmt(variable Stmt) interface{} {
-	//TODO implement me
-	panic("implement me")
+func (i *Interpreter) VisitVariableStmt(variable Stmt) interface{} {
+	var value interface{}
+	class := variable.(*VariableStmt)
+	if class.initializer != nil {
+		value = i.evaluate(class.initializer)
+	}
+	i.env.Define(class.name.Lexeme, value)
+	return nil
 }
 
 // statements 的返回值都是nil
 
-func (i Interpreter) VisitExpressionStmt(expression Stmt) interface{} {
+func (i *Interpreter) VisitExpressionStmt(expression Stmt) interface{} {
 	class := expression.(*ExpressionStmt)
 	i.evaluate(class.Expression)
 	return nil
 }
 
-func (i Interpreter) VisitPrintStmt(print Stmt) interface{} {
+func (i *Interpreter) VisitPrintStmt(print Stmt) interface{} {
 	class := print.(*PrintStmt)
 	value := i.evaluate(class.Expression)
 	fmt.Println(value)
 	return nil
 }
 
-func (i Interpreter) execute(stmt Stmt) {
+func (i *Interpreter) execute(stmt Stmt) {
 	stmt.Accept(i)
 }
 
-func NewInterpreter() Interpreter {
-	return Interpreter{}
+func NewInterpreter() *Interpreter {
+	return &Interpreter{env: NewEnvironment()}
 }
 
-func (i Interpreter) Interpret(statements []Stmt) interface{} {
+func (i *Interpreter) Interpret(statements []Stmt) interface{} {
 	for _, s := range statements {
 		i.executeSingle(s)
 	}
@@ -46,7 +52,7 @@ func (i Interpreter) Interpret(statements []Stmt) interface{} {
 	return nil
 }
 
-func (i Interpreter) executeSingle(stmt Stmt) {
+func (i *Interpreter) executeSingle(stmt Stmt) {
 	defer func() {
 		if r := recover(); r != nil {
 			switch r.(type) {
@@ -62,7 +68,7 @@ func (i Interpreter) executeSingle(stmt Stmt) {
 
 // expression计算结果 四类expression
 
-func (i Interpreter) VisitBinaryExpr(binary Expr) interface{} {
+func (i *Interpreter) VisitBinaryExpr(binary Expr) interface{} {
 	class := binary.(*BinaryExpr)
 	left := i.evaluate(class.left)
 	right := i.evaluate(class.right)
@@ -112,17 +118,17 @@ func (i Interpreter) VisitBinaryExpr(binary Expr) interface{} {
 	return nil
 }
 
-func (i Interpreter) VisitGroupingExpr(grouping Expr) interface{} {
+func (i *Interpreter) VisitGroupingExpr(grouping Expr) interface{} {
 	class := grouping.(*GroupingExpr)
 	return i.evaluate(class.expression)
 }
 
-func (i Interpreter) VisitLiteralExpr(literal Expr) interface{} {
+func (i *Interpreter) VisitLiteralExpr(literal Expr) interface{} {
 	class := literal.(*LiteralExpr)
 	return class.value
 }
 
-func (i Interpreter) VisitUnaryExpr(unary Expr) interface{} {
+func (i *Interpreter) VisitUnaryExpr(unary Expr) interface{} {
 	class := unary.(*UnaryExpr)
 	right := i.evaluate(class.right)
 	switch class.operator.TType {
@@ -135,16 +141,16 @@ func (i Interpreter) VisitUnaryExpr(unary Expr) interface{} {
 	return nil
 }
 
-func (i Interpreter) VisitVariableExpr(variable Expr) interface{} {
-	//TODO implement me
-	panic("implement me")
+func (i *Interpreter) VisitVariableExpr(variable Expr) interface{} {
+	class := variable.(*VariableExpr)
+	return i.env.Get(class.name)
 }
 
-func (i Interpreter) evaluate(expr Expr) interface{} {
+func (i *Interpreter) evaluate(expr Expr) interface{} {
 	return expr.Accept(i)
 }
 
-func (i Interpreter) isTruthy(value interface{}) bool {
+func (i *Interpreter) isTruthy(value interface{}) bool {
 	if value == nil {
 		return false
 	}
@@ -155,7 +161,7 @@ func (i Interpreter) isTruthy(value interface{}) bool {
 	return true
 }
 
-func (i Interpreter) isEqual(left, right interface{}) bool {
+func (i *Interpreter) isEqual(left, right interface{}) bool {
 	if left == nil && right == nil {
 		return true
 	}
@@ -165,7 +171,7 @@ func (i Interpreter) isEqual(left, right interface{}) bool {
 	return left == right
 }
 
-func (i Interpreter) checkNumberOperand(operator *Token.Token, operand interface{}) {
+func (i *Interpreter) checkNumberOperand(operator *Token.Token, operand interface{}) {
 	switch operand.(type) {
 	case float64:
 		return
@@ -174,7 +180,7 @@ func (i Interpreter) checkNumberOperand(operator *Token.Token, operand interface
 	}
 }
 
-func (i Interpreter) checkNumberOperands(operator *Token.Token, left, right interface{}) {
+func (i *Interpreter) checkNumberOperands(operator *Token.Token, left, right interface{}) {
 	_, ok1 := left.(float64)
 	_, ok2 := right.(float64)
 	if ok1 && ok2 {

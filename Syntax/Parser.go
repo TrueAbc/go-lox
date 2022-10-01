@@ -28,7 +28,7 @@ func (p *Parser) Parse() []Stmt {
 	}()
 	stmts := make([]Stmt, 0)
 	for !p.isAtEnd() {
-		stmts = append(stmts, p.statement())
+		stmts = append(stmts, p.declaration())
 	}
 	return stmts
 }
@@ -88,7 +88,7 @@ func (p *Parser) declaration() Stmt {
 				err := r.(*RuntimeError)
 				Errors.LoxRuntimeError(err.Token, err.Content)
 			}
-			// synchronized to new line 避免后面的解析失败
+			// todo synchronized to new line 避免后面的解析失败
 			Logger.Errorf("%v", r)
 		}
 	}()
