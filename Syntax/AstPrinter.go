@@ -9,6 +9,11 @@ import (
 type AstPrinter struct {
 }
 
+func (a AstPrinter) VisitVariableExpr(variable Expr) interface{} {
+	class := variable.(*VariableExpr)
+	return class.name.Lexeme
+}
+
 func (a AstPrinter) VisitBinaryExpr(binary Expr) interface{} {
 	class := binary.(*BinaryExpr)
 	return a.parenthesize(class.operator.Lexeme,

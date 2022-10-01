@@ -10,6 +10,11 @@ import (
 type Interpreter struct {
 }
 
+func (i Interpreter) VisitVariableStmt(variable Stmt) interface{} {
+	//TODO implement me
+	panic("implement me")
+}
+
 // statements 的返回值都是nil
 
 func (i Interpreter) VisitExpressionStmt(expression Stmt) interface{} {
@@ -128,6 +133,11 @@ func (i Interpreter) VisitUnaryExpr(unary Expr) interface{} {
 		return !i.isTruthy(right)
 	}
 	return nil
+}
+
+func (i Interpreter) VisitVariableExpr(variable Expr) interface{} {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (i Interpreter) evaluate(expr Expr) interface{} {

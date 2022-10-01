@@ -80,6 +80,36 @@ func (p *Parser) statement() Stmt {
 	return p.expressionStatement()
 }
 
+func (p *Parser) declaration() Stmt {
+	defer func() {
+		if r := recover(); r != nil {
+			switch r.(type) {
+			case *RuntimeError:
+				err := r.(*RuntimeError)
+				Errors.LoxRuntimeError(err.Token, err.Content)
+			}
+			// synchronized to new line 避免后面的解析失败
+			Logger.Errorf("%v", r)
+		}
+	}()
+
+	if p.match(Token.VAR) {
+		return p.varDeclaration()
+	} else {
+		return p.statement()
+	}
+}
+
+func (p *Parser) varDeclaration() Stmt {
+	name := p.consume(Token.IDENTIFIER, "Expected variable name here.")
+	var initializer Expr
+	if p.match(Token.EQUAL) {
+		initializer = p.expression()
+	}
+	p.consume(Token.SEMICOLON, "Expect ';' after variable declaration.")
+	return &VariableStmt{name: name, initializer: initializer}
+}
+
 func (p *Parser) printStatement() Stmt {
 	value := p.expression()
 	p.consume(Token.SEMICOLON, "Expect ';' after value.")
@@ -162,6 +192,9 @@ func (p *Parser) primary() Expr {
 		p.consume(Token.RIGHT_PAREN, "Expect ')' after Expression")
 
 		return &GroupingExpr{expression: expr}
+	}
+	if p.match(Token.IDENTIFIER) {
+		return &VariableExpr{name: p.previous()}
 	}
 	// 最终匹配到terminal符号, 失败说明当前不是合法的表达式
 	panic(p.error(p.peek(), "Expect Expression"))

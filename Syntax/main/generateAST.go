@@ -22,11 +22,13 @@ func main() {
 		"Grouping : Expr expression",
 		"Literal  : interface{} value",
 		"Unary    : *Token.Token operator, Expr right",
+		"Variable : *Token.Token name",
 	})
 
 	defineAst(outDir, "Stmt", []string{
 		"Expression : Expr Expression",
 		"Print : Expr Expression",
+		"Variable : *Token.Token name, Expr initializer",
 	})
 }
 

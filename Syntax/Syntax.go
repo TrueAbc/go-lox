@@ -78,3 +78,17 @@ operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
 //
 //exprStmt       → expression ";" ;
 //printStmt      → "print" expression ";" ;
+
+// 定义变量声明, 情况2 不允许, if内部的声明
+//if (monday) print "Ugh, already?";
+//if (monday) var beverage = "espresso";
+
+//program        → declaration* EOF ;
+//declaration    → varDecl | statement ;
+//statement      → exprStmt| printStmt ;
+//varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
+// 变量声明之后, ast树的根结点也需要可以获取变量
+//primary        → "true" | "false" | "nil"
+//| NUMBER | STRING
+//| "(" expression ")"
+//| IDENTIFIER ;
