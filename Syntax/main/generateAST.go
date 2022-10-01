@@ -23,6 +23,11 @@ func main() {
 		"Literal  : interface{} value",
 		"Unary    : *Token.Token operator, Expr right",
 	})
+
+	defineAst(outDir, "Stmt", []string{
+		"Expression : Expr Expression",
+		"Print : Expr Expression",
+	})
 }
 
 func defineAst(outDir string, inter string, obj []string) {
@@ -39,7 +44,7 @@ func defineAst(outDir string, inter string, obj []string) {
 
 	// 表达式定义
 	write.WriteString("type " + inter + " interface { \n")
-	write.WriteString("\tAccept(visitor Visitor) interface{}")
+	write.WriteString(fmt.Sprintf("\tAccept(visitor Visitor%s) interface{}", inter))
 	write.WriteString("\n")
 	write.WriteString("}\n")
 
@@ -59,7 +64,8 @@ func defineAst(outDir string, inter string, obj []string) {
 }
 
 func defineVisitor(out *bufio.Writer, baseName string, fields []string) {
-	out.WriteString("type Visitor interface { \n")
+	out.WriteString(fmt.Sprintf("type Visitor%s interface { \n",
+		baseName))
 
 	for _, i := range fields {
 		temp := strings.Split(i, ":")
@@ -71,7 +77,7 @@ func defineVisitor(out *bufio.Writer, baseName string, fields []string) {
 }
 
 func defineType(out *bufio.Writer, baseName, className string, fields []string) {
-	out.WriteString("type " + className + " struct { \n")
+	out.WriteString("type " + className + baseName + " struct { \n")
 	for _, i := range fields {
 		i = strings.TrimSpace(i)
 		items := strings.Split(i, " ")
@@ -87,8 +93,8 @@ func defineType(out *bufio.Writer, baseName, className string, fields []string) 
 	// func (b *Binary) Accept(visitor Visitor) interface{}  {
 	//
 	//}
-	out.WriteString(fmt.Sprintf("func (%s *%s) Accept(visitor Visitor) interface{} {\n",
-		strings.ToLower(className), className))
+	out.WriteString(fmt.Sprintf("func (%s *%s) Accept(visitor Visitor%s) interface{} {\n",
+		strings.ToLower(className), className+baseName, baseName))
 	out.WriteString("return visitor." + "Visit" + className + baseName + "(" + strings.ToLower(className) + ")")
 
 	out.WriteString("}\n")

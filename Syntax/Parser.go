@@ -20,13 +20,17 @@ func NewParser(tokens []*Token.Token) *Parser {
 	return p
 }
 
-func (p *Parser) Parse() Expr {
+func (p *Parser) Parse() []Stmt {
 	defer func() {
 		if r := recover(); r != nil {
 			Logger.Errorf("%v", r)
 		}
 	}()
-	return p.expression()
+	stmts := make([]Stmt, 0)
+	for !p.isAtEnd() {
+		stmts = append(stmts, p.statement())
+	}
+	return stmts
 }
 
 func (p *Parser) isAtEnd() bool {
@@ -69,12 +73,31 @@ func (p *Parser) expression() Expr {
 	return p.equality()
 }
 
+func (p *Parser) statement() Stmt {
+	if p.match(Token.PRINT) {
+		return p.printStatement()
+	}
+	return p.expressionStatement()
+}
+
+func (p *Parser) printStatement() Stmt {
+	value := p.expression()
+	p.consume(Token.SEMICOLON, "Expect ';' after value.")
+	return &PrintStmt{value}
+}
+
+func (p *Parser) expressionStatement() Stmt {
+	value := p.expression()
+	p.consume(Token.SEMICOLON, "Expect ';' after value.")
+	return &ExpressionStmt{value}
+}
+
 func (p *Parser) equality() Expr {
 	expr := p.comparison()
 	for p.match(Token.BANG_EQUAL, Token.EQUAL_EQUAL) {
 		op := p.previous()
 		right := p.comparison()
-		expr = &Binary{left: expr, operator: op, right: right}
+		expr = &BinaryExpr{left: expr, operator: op, right: right}
 	}
 	return expr
 }
@@ -84,7 +107,7 @@ func (p *Parser) comparison() Expr {
 	for p.match(Token.GREATER, Token.GREATER_EQUAL, Token.LESS, Token.LESS_EQUAL) {
 		op := p.previous()
 		right := p.term()
-		expr = &Binary{left: expr, operator: op, right: right}
+		expr = &BinaryExpr{left: expr, operator: op, right: right}
 	}
 	return expr
 }
@@ -94,7 +117,7 @@ func (p *Parser) term() Expr {
 	for p.match(Token.MINUS, Token.PLUS) {
 		op := p.previous()
 		right := p.factor()
-		expr = &Binary{left: expr, operator: op, right: right}
+		expr = &BinaryExpr{left: expr, operator: op, right: right}
 	}
 	return expr
 }
@@ -104,7 +127,7 @@ func (p *Parser) factor() Expr {
 	for p.match(Token.SLASH, Token.STAR) {
 		op := p.previous()
 		right := p.unary()
-		expr = &Binary{expr, op, right}
+		expr = &BinaryExpr{expr, op, right}
 	}
 	return expr
 }
@@ -113,7 +136,7 @@ func (p *Parser) unary() Expr {
 	if p.match(Token.BANG, Token.MINUS) {
 		op := p.previous()
 		right := p.unary()
-		return &Unary{op, right}
+		return &UnaryExpr{op, right}
 	}
 
 	return p.primary()
@@ -121,24 +144,24 @@ func (p *Parser) unary() Expr {
 
 func (p *Parser) primary() Expr {
 	if p.match(Token.FALSE) {
-		return &Literal{false}
+		return &LiteralExpr{false}
 	}
 	if p.match(Token.TRUE) {
-		return &Literal{true}
+		return &LiteralExpr{true}
 	}
 	if p.match(Token.NIL) {
-		return &Literal{nil}
+		return &LiteralExpr{nil}
 	}
 
 	if p.match(Token.NUMBER, Token.STRING) {
-		return &Literal{p.previous().Literal}
+		return &LiteralExpr{p.previous().Literal}
 	}
 	if p.match(Token.LEFT_PAREN) {
 		expr := p.expression()
 
 		p.consume(Token.RIGHT_PAREN, "Expect ')' after Expression")
 
-		return &Grouping{expression: expr}
+		return &GroupingExpr{expression: expr}
 	}
 	// 最终匹配到terminal符号, 失败说明当前不是合法的表达式
 	panic(p.error(p.peek(), "Expect Expression"))

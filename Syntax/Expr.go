@@ -5,45 +5,45 @@ import (
 )
 
 type Expr interface {
-	Accept(visitor Visitor) interface{}
+	Accept(visitor VisitorExpr) interface{}
 }
-type Visitor interface {
+type VisitorExpr interface {
 	VisitBinaryExpr(binary Expr) interface{}
 	VisitGroupingExpr(grouping Expr) interface{}
 	VisitLiteralExpr(literal Expr) interface{}
 	VisitUnaryExpr(unary Expr) interface{}
 }
-type Binary struct {
+type BinaryExpr struct {
 	left     Expr
 	operator *Token.Token
 	right    Expr
 }
 
-func (binary *Binary) Accept(visitor Visitor) interface{} {
+func (binary *BinaryExpr) Accept(visitor VisitorExpr) interface{} {
 	return visitor.VisitBinaryExpr(binary)
 }
 
-type Grouping struct {
+type GroupingExpr struct {
 	expression Expr
 }
 
-func (grouping *Grouping) Accept(visitor Visitor) interface{} {
+func (grouping *GroupingExpr) Accept(visitor VisitorExpr) interface{} {
 	return visitor.VisitGroupingExpr(grouping)
 }
 
-type Literal struct {
+type LiteralExpr struct {
 	value interface{}
 }
 
-func (literal *Literal) Accept(visitor Visitor) interface{} {
+func (literal *LiteralExpr) Accept(visitor VisitorExpr) interface{} {
 	return visitor.VisitLiteralExpr(literal)
 }
 
-type Unary struct {
+type UnaryExpr struct {
 	operator *Token.Token
 	right    Expr
 }
 
-func (unary *Unary) Accept(visitor Visitor) interface{} {
+func (unary *UnaryExpr) Accept(visitor VisitorExpr) interface{} {
 	return visitor.VisitUnaryExpr(unary)
 }

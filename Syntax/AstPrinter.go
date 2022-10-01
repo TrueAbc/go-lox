@@ -10,20 +10,20 @@ type AstPrinter struct {
 }
 
 func (a AstPrinter) VisitBinaryExpr(binary Expr) interface{} {
-	class := binary.(*Binary)
+	class := binary.(*BinaryExpr)
 	return a.parenthesize(class.operator.Lexeme,
 		class.left, class.right)
 }
 
 func (a AstPrinter) VisitGroupingExpr(grouping Expr) interface{} {
 	//TODO implement me
-	class := grouping.(*Grouping)
+	class := grouping.(*GroupingExpr)
 	return a.parenthesize("group", class.expression)
 }
 
 func (a AstPrinter) VisitLiteralExpr(literal Expr) interface{} {
 	//TODO implement me
-	class := literal.(*Literal)
+	class := literal.(*LiteralExpr)
 	if class.value == nil {
 		return Token.NIL
 	}
@@ -31,8 +31,7 @@ func (a AstPrinter) VisitLiteralExpr(literal Expr) interface{} {
 }
 
 func (a AstPrinter) VisitUnaryExpr(unary Expr) interface{} {
-	//TODO implement me
-	class := unary.(*Unary)
+	class := unary.(*UnaryExpr)
 	return a.parenthesize(class.operator.Lexeme, class.right)
 }
 

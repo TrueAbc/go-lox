@@ -69,3 +69,12 @@ operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
 //|	if or switch statement
 //* or +	while or for loop
 //?	if statement
+
+//  添加 statemenet 支持语法
+//program        → statement* EOF ;
+//
+//statement      → exprStmt
+//| printStmt ;
+//
+//exprStmt       → expression ";" ;
+//printStmt      → "print" expression ";" ;

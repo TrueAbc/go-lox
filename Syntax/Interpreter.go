@@ -10,11 +10,38 @@ import (
 type Interpreter struct {
 }
 
+// statements 的返回值都是nil
+
+func (i Interpreter) VisitExpressionStmt(expression Stmt) interface{} {
+	class := expression.(*ExpressionStmt)
+	i.evaluate(class.Expression)
+	return nil
+}
+
+func (i Interpreter) VisitPrintStmt(print Stmt) interface{} {
+	class := print.(*PrintStmt)
+	value := i.evaluate(class.Expression)
+	fmt.Println(value)
+	return nil
+}
+
+func (i Interpreter) execute(stmt Stmt) {
+	stmt.Accept(i)
+}
+
 func NewInterpreter() Interpreter {
 	return Interpreter{}
 }
 
-func (i Interpreter) Interpret(expression Expr) interface{} {
+func (i Interpreter) Interpret(statements []Stmt) interface{} {
+	for _, s := range statements {
+		i.executeSingle(s)
+	}
+
+	return nil
+}
+
+func (i Interpreter) executeSingle(stmt Stmt) {
 	defer func() {
 		if r := recover(); r != nil {
 			switch r.(type) {
@@ -25,13 +52,13 @@ func (i Interpreter) Interpret(expression Expr) interface{} {
 			Logger.Errorf("%v", r)
 		}
 	}()
-	eval := i.evaluate(expression)
-	fmt.Println(eval)
-	return eval
+	i.execute(stmt)
 }
 
+// expression计算结果 四类expression
+
 func (i Interpreter) VisitBinaryExpr(binary Expr) interface{} {
-	class := binary.(*Binary)
+	class := binary.(*BinaryExpr)
 	left := i.evaluate(class.left)
 	right := i.evaluate(class.right)
 	switch class.operator.TType {
@@ -81,17 +108,17 @@ func (i Interpreter) VisitBinaryExpr(binary Expr) interface{} {
 }
 
 func (i Interpreter) VisitGroupingExpr(grouping Expr) interface{} {
-	class := grouping.(*Grouping)
+	class := grouping.(*GroupingExpr)
 	return i.evaluate(class.expression)
 }
 
 func (i Interpreter) VisitLiteralExpr(literal Expr) interface{} {
-	class := literal.(*Literal)
+	class := literal.(*LiteralExpr)
 	return class.value
 }
 
 func (i Interpreter) VisitUnaryExpr(unary Expr) interface{} {
-	class := unary.(*Unary)
+	class := unary.(*UnaryExpr)
 	right := i.evaluate(class.right)
 	switch class.operator.TType {
 	case Token.MINUS:

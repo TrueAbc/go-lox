@@ -10,3 +10,4 @@ build:
 
 all: clean build
 	gofmt -w ../Expr.go
+	gofmt -w ../Stmt.go
