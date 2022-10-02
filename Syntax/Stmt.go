@@ -11,6 +11,7 @@ type VisitorStmt interface {
 	VisitExpressionStmt(expression Stmt) interface{}
 	VisitPrintStmt(print Stmt) interface{}
 	VisitVariableStmt(variable Stmt) interface{}
+	VisitBlockStmt(block Stmt) interface{}
 }
 type ExpressionStmt struct {
 	Expression Expr
@@ -35,4 +36,12 @@ type VariableStmt struct {
 
 func (variable *VariableStmt) Accept(visitor VisitorStmt) interface{} {
 	return visitor.VisitVariableStmt(variable)
+}
+
+type BlockStmt struct {
+	statements []Stmt
+}
+
+func (block *BlockStmt) Accept(visitor VisitorStmt) interface{} {
+	return visitor.VisitBlockStmt(block)
 }

@@ -105,3 +105,10 @@ operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
 //expression     → assignment ;
 //assignment     → IDENTIFIER "=" assignment
 //| equality ;
+
+// 作用域支持
+//statement      → exprStmt
+//| printStmt
+//| block ;
+//
+//block          → "{" declaration* "}" ;

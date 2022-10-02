@@ -11,6 +11,24 @@ type Interpreter struct {
 	env *Environment // 包含状态了, 需要是全局变量了
 }
 
+func (i *Interpreter) VisitBlockStmt(block Stmt) interface{} {
+	class := block.(*BlockStmt)
+	i.executeBlock(class.statements, NewLocalEnvironment(i.env))
+	return nil
+}
+
+func (i *Interpreter) executeBlock(stmt []Stmt, environment *Environment) {
+	previous := i.env
+	defer func() {
+		i.env = previous
+	}()
+	i.env = environment
+	// 执行内部的子句, 结束后恢复全局作用域
+	for _, s := range stmt {
+		i.execute(s)
+	}
+}
+
 func (i *Interpreter) VisitAssignmentExpr(assignment Expr) interface{} {
 	class := assignment.(*AssignmentExpr)
 	value := i.evaluate(class.value)
