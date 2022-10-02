@@ -7,6 +7,7 @@ import (
 // 存储变量信息
 
 type Environment struct {
+	Enclosing *Environment
 	VarValues map[string]interface{}
 }
 
@@ -19,6 +20,8 @@ func (ev *Environment) Define(name string, value interface{}) {
 func (ev *Environment) Get(token *Token.Token) interface{} {
 	if v, ok := ev.VarValues[token.Lexeme]; ok {
 		return v
+	} else if ev.Enclosing != nil {
+		return ev.Enclosing.Get(token)
 	}
 	panic(NewRuntimeError(token, "Undefined Var "+token.Lexeme+"."))
 }
@@ -26,10 +29,17 @@ func (ev *Environment) Get(token *Token.Token) interface{} {
 func (ev *Environment) Assign(token *Token.Token, value interface{}) interface{} {
 	if _, ok := ev.VarValues[token.Lexeme]; ok {
 		ev.VarValues[token.Lexeme] = value
+	} else if ev.Enclosing != nil {
+		return ev.Enclosing.Assign(token, value)
 	}
 	panic(NewRuntimeError(token, "Undefined var name "+token.Lexeme+"."))
 }
 
+// NewEnvironment 全局作用域和局部作用域
 func NewEnvironment() *Environment {
-	return &Environment{make(map[string]interface{})}
+	return &Environment{nil, make(map[string]interface{})}
+}
+
+func NewLocalEnvironment(enclosing *Environment) *Environment {
+	return &Environment{enclosing, make(map[string]interface{})}
 }
