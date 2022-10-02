@@ -57,7 +57,15 @@ operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
 //comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 //term           → factor ( ( "-" | "+" ) factor )* ;
 //factor         → unary ( ( "/" | "*" ) unary )* ;
-//unary          → ( "!" | "-" ) unary
+//unary       Token equals = previous();
+//      Expr value = assignment();
+//
+//      if (expr instanceof Expr.Variable) {
+//        Token name = ((Expr.Variable)expr).name;
+//        return new Expr.Assign(name, value);
+//      }
+//
+//      error(equals, "Invalid assignment target.");    → ( "!" | "-" ) unary
 //| primary ;
 //primary        → NUMBER | STRING | "true" | "false" | "nil"
 //| "(" expression ")" ;
@@ -92,3 +100,8 @@ operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
 //| NUMBER | STRING
 //| "(" expression ")"
 //| IDENTIFIER ;
+
+// 赋值语句的特点
+//expression     → assignment ;
+//assignment     → IDENTIFIER "=" assignment
+//| equality ;

@@ -13,6 +13,7 @@ type VisitorExpr interface {
 	VisitLiteralExpr(literal Expr) interface{}
 	VisitUnaryExpr(unary Expr) interface{}
 	VisitVariableExpr(variable Expr) interface{}
+	VisitAssignmentExpr(assignment Expr) interface{}
 }
 type BinaryExpr struct {
 	left     Expr
@@ -55,4 +56,13 @@ type VariableExpr struct {
 
 func (variable *VariableExpr) Accept(visitor VisitorExpr) interface{} {
 	return visitor.VisitVariableExpr(variable)
+}
+
+type AssignmentExpr struct {
+	name  *Token.Token
+	value Expr
+}
+
+func (assignment *AssignmentExpr) Accept(visitor VisitorExpr) interface{} {
+	return visitor.VisitAssignmentExpr(assignment)
 }

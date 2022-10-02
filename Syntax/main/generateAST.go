@@ -23,6 +23,7 @@ func main() {
 		"Literal  : interface{} value",
 		"Unary    : *Token.Token operator, Expr right",
 		"Variable : *Token.Token name",
+		"Assignment : *Token.Token name, Expr value",
 	})
 
 	defineAst(outDir, "Stmt", []string{

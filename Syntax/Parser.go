@@ -1,6 +1,7 @@
 package Syntax
 
 import (
+	"fmt"
 	"github.com/trueabc/lox/Errors"
 	"github.com/trueabc/lox/Logger"
 	"github.com/trueabc/lox/Token"
@@ -71,6 +72,24 @@ func (p *Parser) advance() *Token.Token {
 
 func (p *Parser) expression() Expr {
 	return p.equality()
+}
+
+func (p *Parser) assignment() Expr {
+	//var a = "before";
+	// a = "value";
+	expr := p.equality()      // 左侧表达式匹配之后
+	if p.match(Token.EQUAL) { // 如果下一个是equal, 说明左侧不应该求值, 而作为token表示符号
+		equals := p.previous()
+		value := p.assignment()
+		if v, ok := expr.(*VariableExpr); ok {
+			name := v.name
+			return &AssignmentExpr{name: name, value: value}
+		}
+		content := fmt.Sprintf("Invalid assignment target line: %d.", equals.Line)
+		panic(NewParseError(content))
+	}
+	return expr
+	return expr
 }
 
 func (p *Parser) statement() Stmt {

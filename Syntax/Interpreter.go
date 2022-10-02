@@ -11,6 +11,13 @@ type Interpreter struct {
 	env *Environment // 包含状态了, 需要是全局变量了
 }
 
+func (i *Interpreter) VisitAssignmentExpr(assignment Expr) interface{} {
+	class := assignment.(*AssignmentExpr)
+	value := i.evaluate(class.value)
+	i.env.Assign(class.name, value)
+	return value
+}
+
 func (i *Interpreter) VisitVariableStmt(variable Stmt) interface{} {
 	var value interface{}
 	class := variable.(*VariableStmt)

@@ -23,6 +23,13 @@ func (ev *Environment) Get(token *Token.Token) interface{} {
 	panic(NewRuntimeError(token, "Undefined Var "+token.Lexeme+"."))
 }
 
+func (ev *Environment) Assign(token *Token.Token, value interface{}) interface{} {
+	if _, ok := ev.VarValues[token.Lexeme]; ok {
+		ev.VarValues[token.Lexeme] = value
+	}
+	panic(NewRuntimeError(token, "Undefined var name "+token.Lexeme+"."))
+}
+
 func NewEnvironment() *Environment {
 	return &Environment{make(map[string]interface{})}
 }
