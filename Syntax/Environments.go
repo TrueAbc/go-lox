@@ -29,6 +29,7 @@ func (ev *Environment) Get(token *Token.Token) interface{} {
 func (ev *Environment) Assign(token *Token.Token, value interface{}) interface{} {
 	if _, ok := ev.VarValues[token.Lexeme]; ok {
 		ev.VarValues[token.Lexeme] = value
+		return ev.VarValues[token.Lexeme]
 	} else if ev.Enclosing != nil {
 		return ev.Enclosing.Assign(token, value)
 	}

@@ -112,3 +112,41 @@ operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
 //| block ;
 //
 //block          → "{" declaration* "}" ;
+
+// Turing-completeness.
+// Control-flow
+// conditional-flow
+// looping flow
+// statement      → exprStmt
+//               | ifStmt
+//               | printStmt
+//               | block ;
+//
+//ifStmt         → "if" "(" expression ")" statement
+//               ( "else" statement )? ;
+// else应该给谁？
+//if (first) if (second) whenTrue(); else whenFalse(); 就近匹配
+
+// and 和or的优先级高于=
+//assignment     → IDENTIFIER "=" assignment
+//| logic_or ;
+//logic_or       → logic_and ( "or" logic_and )* ;
+//logic_and      → equality ( "and" equality )* ;
+
+//statement      → exprStmt
+//| ifStmt
+//| printStmt
+//| whileStmt
+//| block ;
+//
+//whileStmt      → "while" "(" expression ")" statement ;
+//statement      → exprStmt
+//| forStmt
+//| ifStmt
+//| printStmt
+//| whileStmt
+//| block ;
+// 将for 市委while的语法糖, 执行起来一致
+//forStmt        → "for" "(" ( varDecl | exprStmt | ";" )
+//expression? ";"
+//expression? ")" statement ;

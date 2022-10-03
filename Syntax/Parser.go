@@ -71,13 +71,13 @@ func (p *Parser) advance() *Token.Token {
 }
 
 func (p *Parser) expression() Expr {
-	return p.equality()
+	return p.assignment()
 }
 
 func (p *Parser) assignment() Expr {
 	//var a = "before";
 	// a = "value";
-	expr := p.equality()      // 左侧表达式匹配之后
+	expr := p.or()            // 左侧表达式匹配之后
 	if p.match(Token.EQUAL) { // 如果下一个是equal, 说明左侧不应该求值, 而作为token表示符号
 		equals := p.previous()
 		value := p.assignment()
@@ -91,6 +91,26 @@ func (p *Parser) assignment() Expr {
 	return expr
 }
 
+func (p *Parser) or() Expr {
+	expr := p.and()
+	for p.match(Token.OR) {
+		operator := p.previous()
+		right := p.and()
+		expr = &LogicExpr{expr, operator, right}
+	}
+	return expr
+}
+
+func (p *Parser) and() Expr {
+	expr := p.equality()
+	for p.match(Token.AND) {
+		operator := p.previous()
+		right := p.equality()
+		expr = &LogicExpr{expr, operator, right}
+	}
+	return expr
+}
+
 func (p *Parser) statement() Stmt {
 	if p.match(Token.PRINT) {
 		return p.printStatement()
@@ -100,7 +120,85 @@ func (p *Parser) statement() Stmt {
 			statements: p.block(),
 		}
 	}
+	if p.match(Token.IF) {
+		return p.ifStatement()
+	}
+	if p.match(Token.WHILE) {
+		return p.whileStatement()
+	}
+	if p.match(Token.FOR) {
+		return p.forStatement()
+	}
+
 	return p.expressionStatement()
+}
+
+func (p *Parser) forStatement() Stmt {
+	p.consume(Token.LEFT_PAREN, "Expected left '(' after 'for'")
+	var initializer Stmt
+	if p.match(Token.SEMICOLON) {
+		initializer = nil
+	} else if p.match(Token.VAR) {
+		initializer = p.varDeclaration()
+	} else {
+		initializer = p.expressionStatement()
+	}
+	var condition Expr
+	if !p.check(Token.SEMICOLON) {
+		condition = p.expression()
+	}
+	p.consume(Token.SEMICOLON, "Expect ';' after loop condition.")
+
+	var increment Expr
+	if !p.check(Token.RIGHT_PAREN) {
+		increment = p.expression()
+	}
+	p.consume(Token.RIGHT_PAREN, "Expect ')' after for clauses.")
+	body := p.statement()
+
+	// 合成while
+	if condition == nil {
+		condition = &LiteralExpr{true}
+	}
+	if increment != nil {
+		body = &BlockStmt{[]Stmt{body, &ExpressionStmt{increment}}}
+	}
+
+	body = &WhileStmt{body: body, condition: condition}
+
+	if initializer != nil {
+		body = &BlockStmt{[]Stmt{initializer, body}}
+	}
+	// 	类似这样的语法
+	// {
+	//	var i := 1
+	// 	while i < 10 {
+	//  	print i;
+	// 		i += 1;
+	// }
+	return body
+}
+
+func (p *Parser) whileStatement() Stmt {
+	p.consume(Token.LEFT_PAREN, "Expected left '(' after 'while'.")
+	condition := p.expression()
+	p.consume(Token.RIGHT_PAREN, "Expect ')' after condition.")
+	body := p.statement()
+	return &WhileStmt{condition: condition, body: body}
+}
+
+func (p *Parser) ifStatement() Stmt {
+	p.consume(Token.LEFT_PAREN, "Expected left '(' after 'if'.")
+	condition := p.expression()
+	p.consume(Token.RIGHT_PAREN, "Expect ')' after if condition.")
+	thenBranch := p.statement()
+	var elseBranch Stmt
+
+	if p.match(Token.ELSE) {
+		elseBranch = p.statement()
+	}
+
+	return &IfStmt{condition, thenBranch, elseBranch}
 }
 
 func (p *Parser) declaration() Stmt {
@@ -110,6 +208,9 @@ func (p *Parser) declaration() Stmt {
 			case *RuntimeError:
 				err := r.(*RuntimeError)
 				Errors.LoxRuntimeError(err.Token, err.Content)
+			}
+			for p.peek().Lexeme != "\n" && !p.isAtEnd() {
+				p.current += 1
 			}
 			// todo synchronized to new line 避免后面的解析失败
 			Logger.Errorf("%v", r)

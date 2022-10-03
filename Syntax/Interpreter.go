@@ -11,6 +11,40 @@ type Interpreter struct {
 	env *Environment // 包含状态了, 需要是全局变量了
 }
 
+func (i *Interpreter) VisitWhileStmt(whilestmt Stmt) interface{} {
+	class := whilestmt.(*WhileStmt)
+	for i.isTruthy(i.evaluate(class.condition)) {
+		i.execute(class.body)
+	}
+	return nil
+}
+
+func (i *Interpreter) VisitLogicExpr(logicexpr Expr) interface{} {
+	class := logicexpr.(*LogicExpr)
+	left := i.evaluate(class.left)
+	operator := class.operator
+	if operator.TType == Token.OR {
+		if i.isTruthy(left) {
+			return left
+		}
+	} else {
+		if !i.isTruthy(left) {
+			return left
+		}
+	}
+	return i.evaluate(class.right)
+}
+
+func (i *Interpreter) VisitIfStmt(ifstmt Stmt) interface{} {
+	class := ifstmt.(*IfStmt)
+	if i.isTruthy(i.evaluate(class.condition)) {
+		i.execute(class.thenBranch)
+	} else if class.elseBranch != nil {
+		i.execute(class.elseBranch)
+	}
+	return nil
+}
+
 func (i *Interpreter) VisitBlockStmt(block Stmt) interface{} {
 	class := block.(*BlockStmt)
 	i.executeBlock(class.statements, NewLocalEnvironment(i.env))
@@ -175,6 +209,7 @@ func (i *Interpreter) evaluate(expr Expr) interface{} {
 	return expr.Accept(i)
 }
 
+// 非空对象和bool的true
 func (i *Interpreter) isTruthy(value interface{}) bool {
 	if value == nil {
 		return false

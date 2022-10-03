@@ -8,12 +8,13 @@ type Expr interface {
 	Accept(visitor VisitorExpr) interface{}
 }
 type VisitorExpr interface {
-	VisitBinaryExpr(binary Expr) interface{}
-	VisitGroupingExpr(grouping Expr) interface{}
-	VisitLiteralExpr(literal Expr) interface{}
-	VisitUnaryExpr(unary Expr) interface{}
-	VisitVariableExpr(variable Expr) interface{}
-	VisitAssignmentExpr(assignment Expr) interface{}
+	VisitBinaryExpr(binaryexpr Expr) interface{}
+	VisitGroupingExpr(groupingexpr Expr) interface{}
+	VisitLiteralExpr(literalexpr Expr) interface{}
+	VisitUnaryExpr(unaryexpr Expr) interface{}
+	VisitVariableExpr(variableexpr Expr) interface{}
+	VisitLogicExpr(logicexpr Expr) interface{}
+	VisitAssignmentExpr(assignmentexpr Expr) interface{}
 }
 type BinaryExpr struct {
 	left     Expr
@@ -21,24 +22,24 @@ type BinaryExpr struct {
 	right    Expr
 }
 
-func (binary *BinaryExpr) Accept(visitor VisitorExpr) interface{} {
-	return visitor.VisitBinaryExpr(binary)
+func (binaryexpr *BinaryExpr) Accept(visitor VisitorExpr) interface{} {
+	return visitor.VisitBinaryExpr(binaryexpr)
 }
 
 type GroupingExpr struct {
 	expression Expr
 }
 
-func (grouping *GroupingExpr) Accept(visitor VisitorExpr) interface{} {
-	return visitor.VisitGroupingExpr(grouping)
+func (groupingexpr *GroupingExpr) Accept(visitor VisitorExpr) interface{} {
+	return visitor.VisitGroupingExpr(groupingexpr)
 }
 
 type LiteralExpr struct {
 	value interface{}
 }
 
-func (literal *LiteralExpr) Accept(visitor VisitorExpr) interface{} {
-	return visitor.VisitLiteralExpr(literal)
+func (literalexpr *LiteralExpr) Accept(visitor VisitorExpr) interface{} {
+	return visitor.VisitLiteralExpr(literalexpr)
 }
 
 type UnaryExpr struct {
@@ -46,16 +47,26 @@ type UnaryExpr struct {
 	right    Expr
 }
 
-func (unary *UnaryExpr) Accept(visitor VisitorExpr) interface{} {
-	return visitor.VisitUnaryExpr(unary)
+func (unaryexpr *UnaryExpr) Accept(visitor VisitorExpr) interface{} {
+	return visitor.VisitUnaryExpr(unaryexpr)
 }
 
 type VariableExpr struct {
 	name *Token.Token
 }
 
-func (variable *VariableExpr) Accept(visitor VisitorExpr) interface{} {
-	return visitor.VisitVariableExpr(variable)
+func (variableexpr *VariableExpr) Accept(visitor VisitorExpr) interface{} {
+	return visitor.VisitVariableExpr(variableexpr)
+}
+
+type LogicExpr struct {
+	left     Expr
+	operator *Token.Token
+	right    Expr
+}
+
+func (logicexpr *LogicExpr) Accept(visitor VisitorExpr) interface{} {
+	return visitor.VisitLogicExpr(logicexpr)
 }
 
 type AssignmentExpr struct {
@@ -63,6 +74,6 @@ type AssignmentExpr struct {
 	value Expr
 }
 
-func (assignment *AssignmentExpr) Accept(visitor VisitorExpr) interface{} {
-	return visitor.VisitAssignmentExpr(assignment)
+func (assignmentexpr *AssignmentExpr) Accept(visitor VisitorExpr) interface{} {
+	return visitor.VisitAssignmentExpr(assignmentexpr)
 }

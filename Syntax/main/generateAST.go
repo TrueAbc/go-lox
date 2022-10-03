@@ -23,6 +23,7 @@ func main() {
 		"Literal  : interface{} value",
 		"Unary    : *Token.Token operator, Expr right",
 		"Variable : *Token.Token name",
+		"Logic : Expr left, *Token.Token operator, Expr right",
 		"Assignment : *Token.Token name, Expr value",
 	})
 
@@ -31,6 +32,9 @@ func main() {
 		"Print : Expr Expression",
 		"Variable : *Token.Token name, Expr initializer",
 		"Block : []Stmt statements",
+		"While : Expr condition, Stmt body",
+		"If : Expr condition, Stmt thenBranch," +
+			" Stmt elseBranch",
 	})
 }
 
@@ -74,7 +78,7 @@ func defineVisitor(out *bufio.Writer, baseName string, fields []string) {
 	for _, i := range fields {
 		temp := strings.Split(i, ":")
 		t := strings.TrimSpace(temp[0])
-		out.WriteString(fmt.Sprintf("\tVisit%s%s(%s %s) interface{}\n", t, baseName, strings.ToLower(t), baseName))
+		out.WriteString(fmt.Sprintf("\tVisit%s%s(%s %s) interface{}\n", t, baseName, strings.ToLower(t+baseName), baseName))
 	}
 
 	out.WriteString("}\n")
@@ -98,8 +102,8 @@ func defineType(out *bufio.Writer, baseName, className string, fields []string) 
 	//
 	//}
 	out.WriteString(fmt.Sprintf("func (%s *%s) Accept(visitor Visitor%s) interface{} {\n",
-		strings.ToLower(className), className+baseName, baseName))
-	out.WriteString("return visitor." + "Visit" + className + baseName + "(" + strings.ToLower(className) + ")")
+		strings.ToLower(className+baseName), className+baseName, baseName))
+	out.WriteString("return visitor." + "Visit" + className + baseName + "(" + strings.ToLower(className+baseName) + ")")
 
 	out.WriteString("}\n")
 
