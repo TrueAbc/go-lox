@@ -150,3 +150,15 @@ operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
 //forStmt        → "for" "(" ( varDecl | exprStmt | ";" )
 //expression? ";"
 //expression? ")" statement ;
+//
+//unary          → ( "!" | "-" ) unary | call ;
+//call           → primary ( "(" arguments? ")" )* ;
+//arguments      → expression ( "," expression )* ;
+
+// function declaration
+//declaration    → funDecl
+//| varDecl
+//| statement ;
+//funDecl        → "fun" function ;
+//function       → IDENTIFIER "(" parameters? ")" block ;
+//parameters     → IDENTIFIER ( "," IDENTIFIER )* ;

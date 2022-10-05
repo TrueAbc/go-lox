@@ -8,7 +8,37 @@ import (
 )
 
 type Interpreter struct {
-	env *Environment // 包含状态了, 需要是全局变量了
+	env *Environment
+
+	// 持有最外层的引用
+	global *Environment
+}
+
+func (i *Interpreter) VisitFunctionStmt(functionstmt Stmt) interface{} {
+	class := functionstmt.(*FunctionStmt)
+	function := NewLoxFunction(class)
+	i.env.Define(class.name.Lexeme, function)
+	return nil
+}
+
+func (i *Interpreter) VisitCallExpr(callexpr Expr) interface{} {
+	class := callexpr.(*CallExpr)
+	// 将函数名称转为对象
+	callee := i.evaluate(class.callee)
+	args := make([]interface{}, 0)
+	for _, item := range class.arguments {
+		args = append(args, i.evaluate(item))
+	}
+	funCall, ok := callee.(LoxCallable)
+	if !ok {
+		panic(NewRuntimeError(class.paren, ""+
+			"can only call functions and classes."))
+	}
+	if funCall.Arity() != len(args) {
+		panic(NewRuntimeError(class.paren,
+			fmt.Sprintf("Expected %d arguments. Got %d arguments", funCall.Arity(), len(args))))
+	}
+	return funCall.Call(i, args)
 }
 
 func (i *Interpreter) VisitWhileStmt(whilestmt Stmt) interface{} {
@@ -100,7 +130,9 @@ func (i *Interpreter) execute(stmt Stmt) {
 }
 
 func NewInterpreter() *Interpreter {
-	return &Interpreter{env: NewEnvironment()}
+	global := NewEnvironment()
+	global.Define("clock", ClockFunc{})
+	return &Interpreter{env: global, global: global}
 }
 
 func (i *Interpreter) Interpret(statements []Stmt) interface{} {

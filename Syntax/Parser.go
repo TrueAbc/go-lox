@@ -219,9 +219,31 @@ func (p *Parser) declaration() Stmt {
 
 	if p.match(Token.VAR) {
 		return p.varDeclaration()
+	} else if p.match(Token.FUN) {
+		return p.function("function")
 	} else {
 		return p.statement()
 	}
+}
+
+func (p *Parser) function(kind string) Stmt {
+	name := p.consume(Token.IDENTIFIER, "Expected "+kind+" name.")
+	p.consume(Token.LEFT_PAREN, "Expect '(' after "+kind+" name.")
+	params := make([]*Token.Token, 0)
+	if !p.check(Token.RIGHT_PAREN) {
+		params = append(params, p.consume(Token.IDENTIFIER, "Expected parameter name."))
+		for p.match(Token.COMMA) {
+			if len(params) >= 255 {
+				p.error(p.peek(), "Can't have more than 255 parameters.")
+			}
+			params = append(params, p.consume(Token.IDENTIFIER, "Expected parameter name."))
+		}
+	}
+	p.consume(Token.RIGHT_PAREN, "Expect ')' after parameters.")
+	p.consume(Token.LEFT_BRACE, "Expect '{' before "+kind+" body.")
+
+	body := p.block()
+	return &FunctionStmt{name: name, params: params, body: body}
 }
 
 func (p *Parser) varDeclaration() Stmt {
@@ -303,7 +325,34 @@ func (p *Parser) unary() Expr {
 		return &UnaryExpr{op, right}
 	}
 
-	return p.primary()
+	return p.call()
+}
+
+func (p *Parser) call() Expr {
+	expr := p.primary()
+	if p.match(Token.LEFT_PAREN) {
+		expr = p.finishCall(expr)
+	}
+	return expr
+}
+
+func (p *Parser) finishCall(callee Expr) Expr {
+	// 获取内部的参数
+	arguments := make([]Expr, 0)
+	if !p.match(Token.RIGHT_PAREN) {
+		arguments = append(arguments, p.expression())
+		for p.match(Token.COMMA) {
+			if len(arguments) > 255 {
+				p.error(p.peek(), "Can't have more than 255 arguments.")
+			}
+			arguments = append(arguments, p.expression())
+		}
+	}
+
+	paren := p.consume(Token.RIGHT_PAREN,
+		"Expect ')' after arguments.")
+	// 括号用于进行定位
+	return &CallExpr{callee: callee, arguments: arguments, paren: paren}
 }
 
 func (p *Parser) primary() Expr {

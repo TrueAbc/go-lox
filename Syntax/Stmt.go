@@ -14,6 +14,7 @@ type VisitorStmt interface {
 	VisitBlockStmt(blockstmt Stmt) interface{}
 	VisitWhileStmt(whilestmt Stmt) interface{}
 	VisitIfStmt(ifstmt Stmt) interface{}
+	VisitFunctionStmt(functionstmt Stmt) interface{}
 }
 type ExpressionStmt struct {
 	Expression Expr
@@ -65,4 +66,14 @@ type IfStmt struct {
 
 func (ifstmt *IfStmt) Accept(visitor VisitorStmt) interface{} {
 	return visitor.VisitIfStmt(ifstmt)
+}
+
+type FunctionStmt struct {
+	name   *Token.Token
+	params []*Token.Token
+	body   []Stmt
+}
+
+func (functionstmt *FunctionStmt) Accept(visitor VisitorStmt) interface{} {
+	return visitor.VisitFunctionStmt(functionstmt)
 }
