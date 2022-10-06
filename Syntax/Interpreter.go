@@ -14,6 +14,16 @@ type Interpreter struct {
 	global *Environment
 }
 
+func (i *Interpreter) VisitReturnStmt(returnstmt Stmt) interface{} {
+	class := returnstmt.(*ReturnStmt)
+	var value interface{}
+	if class.value != nil {
+		value = i.evaluate(class.value)
+	}
+
+	panic(&ReturnObj{value})
+}
+
 func (i *Interpreter) VisitFunctionStmt(functionstmt Stmt) interface{} {
 	class := functionstmt.(*FunctionStmt)
 	function := NewLoxFunction(class)
@@ -292,4 +302,13 @@ func (re *RuntimeError) Error() string {
 
 func NewRuntimeError(token *Token.Token, content string) *RuntimeError {
 	return &RuntimeError{Token: token, Content: content}
+}
+
+// ReturnObj return 作为panic跳出内部
+type ReturnObj struct {
+	Value interface{}
+}
+
+func (ro *ReturnObj) Error() string {
+	return "return"
 }

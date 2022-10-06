@@ -162,3 +162,11 @@ operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
 //funDecl        → "fun" function ;
 //function       → IDENTIFIER "(" parameters? ")" block ;
 //parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
+
+// return statement
+////
+//statement      → exprStmt | forStmt | ifStmt | printStmt | returnStmt
+//| whileStmt
+//| block ;
+//
+//returnStmt     → "return" expression? ";" ;

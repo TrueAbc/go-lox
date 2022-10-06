@@ -129,8 +129,22 @@ func (p *Parser) statement() Stmt {
 	if p.match(Token.FOR) {
 		return p.forStatement()
 	}
+	if p.match(Token.RETURN) {
+		return p.returnStatement()
+	}
 
 	return p.expressionStatement()
+}
+
+func (p *Parser) returnStatement() Stmt {
+	keyword := p.previous()
+	var value Expr
+	if !p.check(Token.SEMICOLON) {
+		value = p.expression()
+	}
+	p.consume(Token.SEMICOLON, "Expect ; after value.")
+
+	return &ReturnStmt{keyword: keyword, value: value}
 }
 
 func (p *Parser) forStatement() Stmt {

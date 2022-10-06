@@ -36,6 +36,7 @@ func main() {
 		"While : Expr condition, Stmt body",
 		"If : Expr condition, Stmt thenBranch," +
 			" Stmt elseBranch",
+		"Return     : *Token.Token keyword, Expr value",
 		"Function   : *Token.Token name, []*Token.Token params," +
 			" []Stmt body",
 	})

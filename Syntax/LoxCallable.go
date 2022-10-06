@@ -1,6 +1,8 @@
 package Syntax
 
-import "time"
+import (
+	"time"
+)
 
 type LoxCallable interface {
 	Arity() int
@@ -31,14 +33,21 @@ func (l *LoxFunction) Arity() int {
 	return len(l.funcStmt.params)
 }
 
-func (l *LoxFunction) Call(interpreter *Interpreter, args []interface{}) interface{} {
+func (l *LoxFunction) Call(interpreter *Interpreter, args []interface{}) (result interface{}) {
 	// 默认是使用全局变量, 闭包在这里需要考虑其他
+	defer func() {
+		if r := recover(); r != nil {
+			if v, ok := r.(*ReturnObj); ok {
+				result = v.Value
+			}
+		}
+	}()
 	env := NewLocalEnvironment(interpreter.global)
 	for id, item := range l.funcStmt.params {
 		env.Define(item.Lexeme, args[id])
 	}
 	interpreter.executeBlock(l.funcStmt.body, env)
-	return nil
+	return result
 }
 
 func (l *LoxFunction) String() string {
