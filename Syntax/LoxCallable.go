@@ -27,6 +27,7 @@ func (c ClockFunc) String() string {
 
 type LoxFunction struct {
 	funcStmt *FunctionStmt
+	Closure  *Environment
 }
 
 func (l *LoxFunction) Arity() int {
@@ -42,7 +43,7 @@ func (l *LoxFunction) Call(interpreter *Interpreter, args []interface{}) (result
 			}
 		}
 	}()
-	env := NewLocalEnvironment(interpreter.global)
+	env := NewLocalEnvironment(l.Closure)
 	for id, item := range l.funcStmt.params {
 		env.Define(item.Lexeme, args[id])
 	}
@@ -54,7 +55,7 @@ func (l *LoxFunction) String() string {
 	return "<fn " + l.funcStmt.name.Lexeme + " >"
 }
 
-func NewLoxFunction(declaration *FunctionStmt) *LoxFunction {
-	f := &LoxFunction{funcStmt: declaration}
+func NewLoxFunction(declaration *FunctionStmt, closure *Environment) *LoxFunction {
+	f := &LoxFunction{funcStmt: declaration, Closure: closure}
 	return f
 }

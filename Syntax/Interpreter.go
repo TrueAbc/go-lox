@@ -26,7 +26,8 @@ func (i *Interpreter) VisitReturnStmt(returnstmt Stmt) interface{} {
 
 func (i *Interpreter) VisitFunctionStmt(functionstmt Stmt) interface{} {
 	class := functionstmt.(*FunctionStmt)
-	function := NewLoxFunction(class)
+	// 这里捕获闭包, 函数声明阶段创建的内部变量
+	function := NewLoxFunction(class, i.env)
 	i.env.Define(class.name.Lexeme, function)
 	return nil
 }

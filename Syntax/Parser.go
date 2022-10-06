@@ -353,7 +353,7 @@ func (p *Parser) call() Expr {
 func (p *Parser) finishCall(callee Expr) Expr {
 	// 获取内部的参数
 	arguments := make([]Expr, 0)
-	if !p.match(Token.RIGHT_PAREN) {
+	if !p.check(Token.RIGHT_PAREN) {
 		arguments = append(arguments, p.expression())
 		for p.match(Token.COMMA) {
 			if len(arguments) > 255 {
