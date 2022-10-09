@@ -33,6 +33,7 @@ func main() {
 		"Print : Expr Expression",
 		"Variable : *Token.Token name, Expr initializer",
 		"Block : []Stmt statements",
+		"Class      : *Token.Token name, []Stmt methods",
 		"While : Expr condition, Stmt body",
 		"If : Expr condition, Stmt thenBranch," +
 			" Stmt elseBranch",

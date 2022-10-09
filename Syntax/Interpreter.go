@@ -16,6 +16,14 @@ type Interpreter struct {
 	locals map[Expr]int
 }
 
+func (i *Interpreter) VisitClassStmt(classstmt Stmt) interface{} {
+	class := classstmt.(*ClassStmt)
+	i.env.Define(class.name.Lexeme, nil)
+	klass := NewLoxClass(class.name.Lexeme)
+	i.env.Assign(class.name, klass)
+	return nil
+}
+
 func (i *Interpreter) VisitReturnStmt(returnstmt Stmt) interface{} {
 	class := returnstmt.(*ReturnStmt)
 	var value interface{}

@@ -235,9 +235,25 @@ func (p *Parser) declaration() Stmt {
 		return p.varDeclaration()
 	} else if p.match(Token.FUN) {
 		return p.function("function")
+	} else if p.match(Token.CLASS) {
+		return p.classDeclaration()
 	} else {
 		return p.statement()
 	}
+}
+
+func (p *Parser) classDeclaration() Stmt {
+	name := p.consume(Token.IDENTIFIER, "Expected class name.")
+	p.consume(Token.LEFT_BRACE, "Expected '{' before class body.")
+
+	// []functionStmt
+	methods := make([]Stmt, 0)
+	for !p.check(Token.RIGHT_BRACE) && !p.isAtEnd() {
+		methods = append(methods, p.function("method"))
+	}
+	p.consume(Token.RIGHT_BRACE, "Expected '}' after class body.")
+
+	return &ClassStmt{name: name, methods: methods}
 }
 
 func (p *Parser) function(kind string) Stmt {

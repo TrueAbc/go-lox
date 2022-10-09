@@ -15,6 +15,13 @@ type Resolver struct {
 	currentFunction FunctionType
 }
 
+func (r *Resolver) VisitClassStmt(classstmt Stmt) interface{} {
+	class := classstmt.(*ClassStmt)
+	r.declare(class.name)
+	r.define(class.name)
+	return nil
+}
+
 func (r *Resolver) peek() map[string]bool {
 	return r.scopes[len(r.scopes)-1]
 }

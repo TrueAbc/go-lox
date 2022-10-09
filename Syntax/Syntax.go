@@ -170,3 +170,13 @@ operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
 //| block ;
 //
 //returnStmt     → "return" expression? ";" ;
+
+// 开始面向对象, 语法的相关声明
+//declaration    → classDecl
+//| funDecl
+//| varDecl
+//| statement ;
+//
+//classDecl      → "class" IDENTIFIER "{" function* "}" ;
+//function       → IDENTIFIER "(" parameters? ")" block ;
+//parameters     → IDENTIFIER ( "," IDENTIFIER )* ;

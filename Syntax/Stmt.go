@@ -12,6 +12,7 @@ type VisitorStmt interface {
 	VisitPrintStmt(printstmt Stmt) interface{}
 	VisitVariableStmt(variablestmt Stmt) interface{}
 	VisitBlockStmt(blockstmt Stmt) interface{}
+	VisitClassStmt(classstmt Stmt) interface{}
 	VisitWhileStmt(whilestmt Stmt) interface{}
 	VisitIfStmt(ifstmt Stmt) interface{}
 	VisitReturnStmt(returnstmt Stmt) interface{}
@@ -48,6 +49,15 @@ type BlockStmt struct {
 
 func (blockstmt *BlockStmt) Accept(visitor VisitorStmt) interface{} {
 	return visitor.VisitBlockStmt(blockstmt)
+}
+
+type ClassStmt struct {
+	name    *Token.Token
+	methods []Stmt
+}
+
+func (classstmt *ClassStmt) Accept(visitor VisitorStmt) interface{} {
+	return visitor.VisitClassStmt(classstmt)
 }
 
 type WhileStmt struct {
