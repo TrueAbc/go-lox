@@ -121,6 +121,7 @@ func (r *Resolver) resolveExpr(expr Expr) {
 // 获取变量的深度
 func (r *Resolver) resolveDeep(expr Expr, deep int) {
 	// todo 记录变量访问到的作用域
+	r.resolve(expr, deep)
 }
 
 func (r *Resolver) resolveLocal(expr Expr, token *Token.Token) {
