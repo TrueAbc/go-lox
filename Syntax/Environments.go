@@ -26,6 +26,18 @@ func (ev *Environment) Get(token *Token.Token) interface{} {
 	panic(NewRuntimeError(token, "Undefined Var "+token.Lexeme+"."))
 }
 
+func (ev *Environment) GetAt(dis int, token *Token.Token) interface{} {
+	return ev.Ancestor(dis).VarValues[token.Lexeme]
+}
+
+func (ev *Environment) Ancestor(dis int) *Environment {
+	env := ev
+	for i := 0; i < dis; i++ {
+		env = ev.Enclosing
+	}
+	return env
+}
+
 func (ev *Environment) Assign(token *Token.Token, value interface{}) interface{} {
 	if _, ok := ev.VarValues[token.Lexeme]; ok {
 		ev.VarValues[token.Lexeme] = value
@@ -34,6 +46,10 @@ func (ev *Environment) Assign(token *Token.Token, value interface{}) interface{}
 		return ev.Enclosing.Assign(token, value)
 	}
 	panic(NewRuntimeError(token, "Undefined var name "+token.Lexeme+"."))
+}
+
+func (ev *Environment) AssignAt(dis int, token *Token.Token, value interface{}) interface{} {
+	return ev.Ancestor(dis).Assign(token, value)
 }
 
 // NewEnvironment 全局作用域和局部作用域

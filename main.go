@@ -69,11 +69,14 @@ func run(source string) {
 	// res is an ast
 	res := parser.Parse()
 
-	interpreter.Interpret(res)
+	resolver := Syntax.NewResolver(interpreter)
+	resolver.ResolveStmts(res)
 
 	if Errors.HadError {
 		return
 	}
+
+	interpreter.Interpret(res)
 	if Errors.HadRunTimeError {
 		return
 	}

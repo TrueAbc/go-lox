@@ -12,6 +12,8 @@ type Interpreter struct {
 
 	// 持有最外层的引用
 	global *Environment
+
+	locals map[Expr]int
 }
 
 func (i *Interpreter) VisitReturnStmt(returnstmt Stmt) interface{} {
@@ -107,7 +109,12 @@ func (i *Interpreter) executeBlock(stmt []Stmt, environment *Environment) {
 func (i *Interpreter) VisitAssignmentExpr(assignment Expr) interface{} {
 	class := assignment.(*AssignmentExpr)
 	value := i.evaluate(class.value)
-	i.env.Assign(class.name, value)
+	if dis, ok := i.locals[class]; ok {
+		i.env.AssignAt(dis, class.name, value)
+	} else {
+		i.global.Assign(class.name, value)
+	}
+
 	return value
 }
 
@@ -140,10 +147,14 @@ func (i *Interpreter) execute(stmt Stmt) {
 	stmt.Accept(i)
 }
 
+func (i *Interpreter) resolve(expr Expr, depth int) {
+	i.locals[expr] = depth
+}
+
 func NewInterpreter() *Interpreter {
 	global := NewEnvironment()
 	global.Define("clock", ClockFunc{})
-	return &Interpreter{env: global, global: global}
+	return &Interpreter{env: global, global: global, locals: map[Expr]int{}}
 }
 
 func (i *Interpreter) Interpret(statements []Stmt) interface{} {
@@ -245,7 +256,15 @@ func (i *Interpreter) VisitUnaryExpr(unary Expr) interface{} {
 
 func (i *Interpreter) VisitVariableExpr(variable Expr) interface{} {
 	class := variable.(*VariableExpr)
-	return i.env.Get(class.name)
+	return i.lookupVariable(class.name, variable)
+}
+
+func (i *Interpreter) lookupVariable(name *Token.Token, expr Expr) interface{} {
+	if dis, ok := i.locals[expr]; ok {
+		return i.env.GetAt(dis, name)
+	} else {
+		return i.global.Get(name)
+	}
 }
 
 func (i *Interpreter) evaluate(expr Expr) interface{} {
