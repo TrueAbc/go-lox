@@ -13,10 +13,16 @@ type Resolver struct {
 	// stack for scopes
 	scopes          []map[string]bool
 	currentFunction FunctionType
+	currentClass    ClassType
 }
 
 func (r *Resolver) VisitThisExpr(thisexpr Expr) interface{} {
 	class := thisexpr.(*ThisExpr)
+	if r.currentClass == NoneClass {
+		Errors.LoxError(class.keyword, ""+
+			"Can't use 'this' outside of a class.")
+		return nil
+	}
 	r.resolveLocal(class, class.keyword)
 	return nil
 }
@@ -36,6 +42,8 @@ func (r *Resolver) VisitSetExpr(setexpr Expr) interface{} {
 
 func (r *Resolver) VisitClassStmt(classstmt Stmt) interface{} {
 	class := classstmt.(*ClassStmt)
+	enclosingClass := r.currentClass
+	r.currentClass = Class
 
 	r.declare(class.name)
 	r.define(class.name)
@@ -46,6 +54,7 @@ func (r *Resolver) VisitClassStmt(classstmt Stmt) interface{} {
 		r.resolveFunction(item, METHOD)
 	}
 	r.endScope()
+	r.currentClass = enclosingClass
 	return nil
 }
 
@@ -267,13 +276,22 @@ func NewResolver(i *Interpreter) *Resolver {
 	scopes := make([]map[string]bool, 0)
 	//scopes[0] = make(map[string]bool) // 代表全局?
 	// 用于检测return语句在当前情况是否可行
-	return &Resolver{i, scopes, None}
+	return &Resolver{i, scopes,
+		None, NoneClass}
 }
 
 type FunctionType int32
 
+// 标识return语句的可用范围
 const (
 	None     FunctionType = iota + 1
 	FUNCTION              // normal function
 	METHOD                // function bind to a class
+)
+
+type ClassType int32
+
+const (
+	NoneClass ClassType = iota + 1
+	Class
 )
