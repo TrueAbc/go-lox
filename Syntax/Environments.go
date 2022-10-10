@@ -27,13 +27,14 @@ func (ev *Environment) Get(token *Token.Token) interface{} {
 }
 
 func (ev *Environment) GetAt(dis int, token *Token.Token) interface{} {
-	return ev.Ancestor(dis).VarValues[token.Lexeme]
+	ancestor := ev.Ancestor(dis)
+	return ancestor.VarValues[token.Lexeme]
 }
 
 func (ev *Environment) Ancestor(dis int) *Environment {
 	env := ev
 	for i := 0; i < dis; i++ {
-		env = ev.Enclosing
+		env = env.Enclosing
 	}
 	return env
 }

@@ -30,6 +30,12 @@ type LoxFunction struct {
 	Closure  *Environment
 }
 
+func (l *LoxFunction) Bind(instance *LoxInstance) *LoxFunction {
+	env := NewLocalEnvironment(l.Closure)
+	env.Define("this", instance)
+	return NewLoxFunction(l.funcStmt, env)
+}
+
 func (l *LoxFunction) Arity() int {
 	return len(l.funcStmt.params)
 }

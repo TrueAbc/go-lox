@@ -15,6 +15,12 @@ type Resolver struct {
 	currentFunction FunctionType
 }
 
+func (r *Resolver) VisitThisExpr(thisexpr Expr) interface{} {
+	class := thisexpr.(*ThisExpr)
+	r.resolveLocal(class, class.keyword)
+	return nil
+}
+
 func (r *Resolver) VisitGetExpr(getexpr Expr) interface{} {
 	class := getexpr.(*GetExpr)
 	r.resolveExpr(class.object)
@@ -30,11 +36,16 @@ func (r *Resolver) VisitSetExpr(setexpr Expr) interface{} {
 
 func (r *Resolver) VisitClassStmt(classstmt Stmt) interface{} {
 	class := classstmt.(*ClassStmt)
+
 	r.declare(class.name)
+	r.define(class.name)
+	r.beginScope()
+	r.peek()["this"] = true
+
 	for _, item := range class.methods {
 		r.resolveFunction(item, METHOD)
 	}
-	r.define(class.name)
+	r.endScope()
 	return nil
 }
 

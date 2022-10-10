@@ -16,6 +16,12 @@ type Interpreter struct {
 	locals map[Expr]int
 }
 
+func (i *Interpreter) VisitThisExpr(thisexpr Expr) interface{} {
+	class := thisexpr.(*ThisExpr)
+	value := i.lookupVariable(class.keyword, class)
+	return value
+}
+
 func (i *Interpreter) VisitSetExpr(setexpr Expr) interface{} {
 	class := setexpr.(*SetExpr)
 	obj := i.evaluate(class.object)

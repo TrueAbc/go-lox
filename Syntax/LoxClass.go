@@ -43,7 +43,7 @@ func (li *LoxInstance) Get(token *Token.Token) interface{} {
 		return v
 	}
 	if method := li.kClass.FindMethod(token.Lexeme); method != nil {
-		return method
+		return method.Bind(li)
 	}
 	Errors.LoxRuntimeError(token, "Undefined property '"+token.Lexeme+"'.")
 	return nil

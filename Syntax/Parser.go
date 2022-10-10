@@ -421,6 +421,9 @@ func (p *Parser) primary() Expr {
 	if p.match(Token.IDENTIFIER) {
 		return &VariableExpr{name: p.previous()}
 	}
+	if p.match(Token.THIS) {
+		return &ThisExpr{p.previous()}
+	}
 	// 最终匹配到terminal符号, 失败说明当前不是合法的表达式
 	panic(p.error(p.peek(), "Expect Expression"))
 }
