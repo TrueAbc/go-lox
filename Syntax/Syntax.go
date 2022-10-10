@@ -180,3 +180,10 @@ operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
 //classDecl      → "class" IDENTIFIER "{" function* "}" ;
 //function       → IDENTIFIER "(" parameters? ")" block ;
 //parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
+
+// 添加一个属性, 和function call的优先级一致
+//call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
+//"Get      : Expr object, Token name",
+//assignment     → ( call "." )? IDENTIFIER "=" assignment
+//| logic_or ;
+//"Set      : Expr object, Token name, Expr value",

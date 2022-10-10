@@ -26,6 +26,7 @@ func LoxError(token *Token.Token, mess string) string {
 
 func LoxRuntimeError(token *Token.Token, mess string) {
 	HadRunTimeError = true
+	// todo need to be panic
 	report(token.Line, "at '"+token.Lexeme+"'",
 		mess)
 }

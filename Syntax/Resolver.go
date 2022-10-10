@@ -15,9 +15,25 @@ type Resolver struct {
 	currentFunction FunctionType
 }
 
+func (r *Resolver) VisitGetExpr(getexpr Expr) interface{} {
+	class := getexpr.(*GetExpr)
+	r.resolveExpr(class.object)
+	return nil
+}
+
+func (r *Resolver) VisitSetExpr(setexpr Expr) interface{} {
+	class := setexpr.(*SetExpr)
+	r.resolveExpr(class.value)
+	r.resolveExpr(class.object)
+	return nil
+}
+
 func (r *Resolver) VisitClassStmt(classstmt Stmt) interface{} {
 	class := classstmt.(*ClassStmt)
 	r.declare(class.name)
+	for _, item := range class.methods {
+		r.resolveFunction(item, METHOD)
+	}
 	r.define(class.name)
 	return nil
 }
@@ -246,6 +262,7 @@ func NewResolver(i *Interpreter) *Resolver {
 type FunctionType int32
 
 const (
-	None FunctionType = iota + 1
-	FUNCTION
+	None     FunctionType = iota + 1
+	FUNCTION              // normal function
+	METHOD                // function bind to a class
 )

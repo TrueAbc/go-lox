@@ -13,6 +13,8 @@ type VisitorExpr interface {
 	VisitLiteralExpr(literalexpr Expr) interface{}
 	VisitUnaryExpr(unaryexpr Expr) interface{}
 	VisitVariableExpr(variableexpr Expr) interface{}
+	VisitGetExpr(getexpr Expr) interface{}
+	VisitSetExpr(setexpr Expr) interface{}
 	VisitLogicExpr(logicexpr Expr) interface{}
 	VisitAssignmentExpr(assignmentexpr Expr) interface{}
 	VisitCallExpr(callexpr Expr) interface{}
@@ -58,6 +60,25 @@ type VariableExpr struct {
 
 func (variableexpr *VariableExpr) Accept(visitor VisitorExpr) interface{} {
 	return visitor.VisitVariableExpr(variableexpr)
+}
+
+type GetExpr struct {
+	object Expr
+	name   *Token.Token
+}
+
+func (getexpr *GetExpr) Accept(visitor VisitorExpr) interface{} {
+	return visitor.VisitGetExpr(getexpr)
+}
+
+type SetExpr struct {
+	object Expr
+	name   *Token.Token
+	value  Expr
+}
+
+func (setexpr *SetExpr) Accept(visitor VisitorExpr) interface{} {
+	return visitor.VisitSetExpr(setexpr)
 }
 
 type LogicExpr struct {

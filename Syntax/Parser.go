@@ -85,6 +85,9 @@ func (p *Parser) assignment() Expr {
 			name := v.name
 			return &AssignmentExpr{name: name, value: value}
 		}
+		if v, ok := expr.(*GetExpr); ok {
+			return &SetExpr{v.object, v.name, value}
+		}
 		content := fmt.Sprintf("Invalid assignment target line: %d.", equals.Line)
 		panic(NewParseError(content))
 	}
@@ -360,9 +363,18 @@ func (p *Parser) unary() Expr {
 
 func (p *Parser) call() Expr {
 	expr := p.primary()
-	if p.match(Token.LEFT_PAREN) {
-		expr = p.finishCall(expr)
+	for {
+		if p.match(Token.LEFT_PAREN) {
+			expr = p.finishCall(expr)
+		} else if p.match(Token.DOT) {
+			name := p.consume(Token.IDENTIFIER,
+				"Expect property name after '.'.")
+			expr = &GetExpr{expr, name}
+		} else {
+			break
+		}
 	}
+
 	return expr
 }
 

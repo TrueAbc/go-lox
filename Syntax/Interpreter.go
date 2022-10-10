@@ -16,10 +16,38 @@ type Interpreter struct {
 	locals map[Expr]int
 }
 
+func (i *Interpreter) VisitSetExpr(setexpr Expr) interface{} {
+	class := setexpr.(*SetExpr)
+	obj := i.evaluate(class.object)
+	if _, ok := obj.(*LoxInstance); !ok {
+		Errors.LoxRuntimeError(class.name, "Only instances have fields.")
+	}
+
+	value := i.evaluate(class.value)
+	obj.(*LoxInstance).Set(class.name, value)
+	return value
+}
+
+func (i *Interpreter) VisitGetExpr(getexpr Expr) interface{} {
+	class := getexpr.(*GetExpr)
+	value := i.evaluate(class.object)
+	if v, ok := value.(*LoxInstance); ok {
+		return v.Get(class.name)
+	}
+	Errors.LoxRuntimeError(class.name, "Only instances have properties.")
+	return nil
+}
+
 func (i *Interpreter) VisitClassStmt(classstmt Stmt) interface{} {
 	class := classstmt.(*ClassStmt)
 	i.env.Define(class.name.Lexeme, nil)
-	klass := NewLoxClass(class.name.Lexeme)
+	methods := make(map[string]*LoxFunction)
+	for _, item := range class.methods {
+		fClass := item.(*FunctionStmt)
+		function := NewLoxFunction(fClass, i.env)
+		methods[fClass.name.Lexeme] = function
+	}
+	klass := NewLoxClass(class.name.Lexeme, methods)
 	i.env.Assign(class.name, klass)
 	return nil
 }

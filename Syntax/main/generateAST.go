@@ -23,6 +23,8 @@ func main() {
 		"Literal  : interface{} value",
 		"Unary    : *Token.Token operator, Expr right",
 		"Variable : *Token.Token name",
+		"Get      : Expr object, *Token.Token name",
+		"Set      : Expr object, *Token.Token name, Expr value",
 		"Logic : Expr left, *Token.Token operator, Expr right",
 		"Assignment : *Token.Token name, Expr value",
 		"Call     : Expr callee, *Token.Token paren, []Expr arguments",
