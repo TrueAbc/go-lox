@@ -59,11 +59,12 @@ func (li *LoxInstance) Get(token *Token.Token) interface{} {
 	if v, ok := li.fields[token.Lexeme]; ok {
 		return v
 	}
+	// 获取到的所有方法都应该bind了this对象
 	if method := li.kClass.FindMethod(token.Lexeme); method != nil {
 		return method.Bind(li)
 	}
 	if li.kClass.superClass != nil {
-		return li.kClass.superClass.FindMethod(token.Lexeme)
+		return li.kClass.superClass.FindMethod(token.Lexeme).Bind(li)
 	}
 	Errors.LoxRuntimeError(token, "Undefined property '"+token.Lexeme+"'.")
 	return nil

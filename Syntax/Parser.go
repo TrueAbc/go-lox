@@ -431,6 +431,13 @@ func (p *Parser) primary() Expr {
 	if p.match(Token.THIS) {
 		return &ThisExpr{p.previous()}
 	}
+	if p.match(Token.SUPER) {
+		keyword := p.previous()
+		p.consume(Token.DOT, "Expect '.' after 'super'.")
+		method := p.consume(Token.IDENTIFIER,
+			"Expect superclass method name.")
+		return &SuperExpr{keyword, method}
+	}
 	// 最终匹配到terminal符号, 失败说明当前不是合法的表达式
 	panic(p.error(p.peek(), "Expect Expression"))
 }

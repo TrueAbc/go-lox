@@ -16,6 +16,22 @@ type Interpreter struct {
 	locals map[Expr]int
 }
 
+func (i *Interpreter) VisitSuperExpr(superexpr Expr) interface{} {
+	class := superexpr.(*SuperExpr)
+	dis := i.locals[class]
+	super := i.env.GetWithString(dis, "super").(*LoxClass)
+	// super应该是在类方法内部调用, 已经有this了
+	object := i.env.GetWithString(
+		dis-1, "this").(*LoxInstance)
+	method := super.FindMethod(class.method.Lexeme)
+	if method == nil {
+		panic(NewRuntimeError(class.method, ""+
+			"Undefined property '"+class.method.Lexeme+"'."))
+	}
+	// super 在method的closure中存储
+	return method.Bind(object)
+}
+
 func (i *Interpreter) VisitThisExpr(thisexpr Expr) interface{} {
 	class := thisexpr.(*ThisExpr)
 	value := i.lookupVariable(class.keyword, class)
@@ -56,6 +72,10 @@ func (i *Interpreter) VisitClassStmt(classstmt Stmt) interface{} {
 	}
 
 	i.env.Define(class.name.Lexeme, nil)
+	if class.superClass != nil {
+		i.env = NewLocalEnvironment(i.env)
+		i.env.Define("super", superclass)
+	}
 	methods := make(map[string]*LoxFunction)
 	for _, item := range class.methods {
 		fClass := item.(*FunctionStmt)
@@ -67,6 +87,9 @@ func (i *Interpreter) VisitClassStmt(classstmt Stmt) interface{} {
 		superclass = superclass.(*LoxClass)
 	}
 	klass := NewLoxClass(class.name.Lexeme, methods, superclass)
+	if superclass != nil {
+		i.env = i.env.Enclosing
+	}
 	i.env.Assign(class.name, klass)
 	return nil
 }

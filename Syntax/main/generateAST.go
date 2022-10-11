@@ -24,6 +24,7 @@ func main() {
 		"Unary    : *Token.Token operator, Expr right",
 		"Variable : *Token.Token name",
 		"This : *Token.Token keyword",
+		"Super    : *Token.Token keyword, *Token.Token method",
 		"Get      : Expr object, *Token.Token name",
 		"Set      : Expr object, *Token.Token name, Expr value",
 		"Logic : Expr left, *Token.Token operator, Expr right",

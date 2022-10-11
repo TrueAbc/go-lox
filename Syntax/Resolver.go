@@ -16,6 +16,12 @@ type Resolver struct {
 	currentClass    ClassType
 }
 
+func (r *Resolver) VisitSuperExpr(superexpr Expr) interface{} {
+	class := superexpr.(*SuperExpr)
+	r.resolveLocal(class, class.keyword)
+	return nil
+}
+
 func (r *Resolver) VisitThisExpr(thisexpr Expr) interface{} {
 	class := thisexpr.(*ThisExpr)
 	if r.currentClass == NoneClass {
@@ -57,7 +63,11 @@ func (r *Resolver) VisitClassStmt(classstmt Stmt) interface{} {
 
 	if class.superClass != nil {
 		r.resolveExpr(class.superClass)
+
+		r.beginScope()
+		r.peek()["super"] = true
 	}
+	// for this pointer and methods
 	r.beginScope()
 	r.peek()["this"] = true
 
@@ -70,6 +80,9 @@ func (r *Resolver) VisitClassStmt(classstmt Stmt) interface{} {
 	}
 	r.endScope()
 	r.currentClass = enclosingClass
+	if class.superClass != nil {
+		r.endScope()
+	}
 	return nil
 }
 
