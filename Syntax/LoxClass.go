@@ -17,11 +17,20 @@ func (lc *LoxClass) FindMethod(name string) *LoxFunction {
 	return nil
 }
 func (lc *LoxClass) Arity() int {
-	return 0
+	initializer := lc.FindMethod("init")
+	if initializer == nil {
+		return 0
+	}
+	return initializer.Arity()
 }
 
 func (lc *LoxClass) Call(interpreter *Interpreter, args []interface{}) interface{} {
 	instance := NewLoxInstance(lc)
+	initializer := lc.FindMethod("init")
+	if initializer != nil {
+		initializer.Bind(instance).Call(interpreter, args)
+	}
+
 	return instance
 }
 

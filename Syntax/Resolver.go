@@ -51,7 +51,11 @@ func (r *Resolver) VisitClassStmt(classstmt Stmt) interface{} {
 	r.peek()["this"] = true
 
 	for _, item := range class.methods {
-		r.resolveFunction(item, METHOD)
+		declaration := METHOD
+		if item.(*FunctionStmt).name.Lexeme == "init" {
+			declaration = ISINITIALIZER
+		}
+		r.resolveFunction(item, declaration)
 	}
 	r.endScope()
 	r.currentClass = enclosingClass
@@ -227,6 +231,10 @@ func (r *Resolver) VisitReturnStmt(stmt Stmt) interface{} {
 	}
 
 	if class.value != nil {
+		if r.currentFunction == ISINITIALIZER {
+			Errors.LoxError(class.keyword, "Can't return a value"+
+				" from an initializer")
+		}
 		r.resolveExpr(class.value)
 	}
 	return nil
@@ -284,9 +292,10 @@ type FunctionType int32
 
 // 标识return语句的可用范围
 const (
-	None     FunctionType = iota + 1
-	FUNCTION              // normal function
-	METHOD                // function bind to a class
+	None          FunctionType = iota + 1
+	FUNCTION                   // normal function
+	ISINITIALIZER              // constructor no return value
+	METHOD                     // function bind to a class
 )
 
 type ClassType int32

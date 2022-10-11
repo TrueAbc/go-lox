@@ -31,6 +31,11 @@ func (ev *Environment) GetAt(dis int, token *Token.Token) interface{} {
 	return ancestor.VarValues[token.Lexeme]
 }
 
+func (ev *Environment) GetWithString(dis int, key string) interface{} {
+	ancestor := ev.Ancestor(dis)
+	return ancestor.VarValues[key]
+}
+
 func (ev *Environment) Ancestor(dis int) *Environment {
 	env := ev
 	for i := 0; i < dis; i++ {

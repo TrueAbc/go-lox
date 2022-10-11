@@ -50,7 +50,8 @@ func (i *Interpreter) VisitClassStmt(classstmt Stmt) interface{} {
 	methods := make(map[string]*LoxFunction)
 	for _, item := range class.methods {
 		fClass := item.(*FunctionStmt)
-		function := NewLoxFunction(fClass, i.env)
+		function := NewLoxFunction(fClass, i.env,
+			fClass.name.Lexeme == "init")
 		methods[fClass.name.Lexeme] = function
 	}
 	klass := NewLoxClass(class.name.Lexeme, methods)
@@ -71,7 +72,7 @@ func (i *Interpreter) VisitReturnStmt(returnstmt Stmt) interface{} {
 func (i *Interpreter) VisitFunctionStmt(functionstmt Stmt) interface{} {
 	class := functionstmt.(*FunctionStmt)
 	// 这里捕获闭包, 函数声明阶段创建的内部变量
-	function := NewLoxFunction(class, i.env)
+	function := NewLoxFunction(class, i.env, false)
 	i.env.Define(class.name.Lexeme, function)
 	return nil
 }
