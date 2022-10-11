@@ -18,6 +18,11 @@ type Resolver struct {
 
 func (r *Resolver) VisitSuperExpr(superexpr Expr) interface{} {
 	class := superexpr.(*SuperExpr)
+	if r.currentClass == NoneClass {
+		Errors.LoxError(class.keyword, "Can't use 'super' outside of a class.")
+	} else if r.currentClass != SUBCLASS {
+		Errors.LoxError(class.keyword, "Can't use 'super' in a class with no superclass.")
+	}
 	r.resolveLocal(class, class.keyword)
 	return nil
 }
@@ -62,6 +67,7 @@ func (r *Resolver) VisitClassStmt(classstmt Stmt) interface{} {
 	}
 
 	if class.superClass != nil {
+		r.currentClass = SUBCLASS
 		r.resolveExpr(class.superClass)
 
 		r.beginScope()
@@ -327,4 +333,5 @@ type ClassType int32
 const (
 	NoneClass ClassType = iota + 1
 	Class
+	SUBCLASS
 )
