@@ -247,6 +247,13 @@ func (p *Parser) declaration() Stmt {
 
 func (p *Parser) classDeclaration() Stmt {
 	name := p.consume(Token.IDENTIFIER, "Expected class name.")
+
+	var superClass *VariableExpr
+	if p.match(Token.LESS) {
+		p.consume(Token.IDENTIFIER, "Expect superclass name.")
+		superClass = &VariableExpr{p.previous()}
+	}
+
 	p.consume(Token.LEFT_BRACE, "Expected '{' before class body.")
 
 	// []functionStmt
@@ -256,7 +263,7 @@ func (p *Parser) classDeclaration() Stmt {
 	}
 	p.consume(Token.RIGHT_BRACE, "Expected '}' after class body.")
 
-	return &ClassStmt{name: name, methods: methods}
+	return &ClassStmt{name: name, methods: methods, superClass: superClass}
 }
 
 func (p *Parser) function(kind string) Stmt {

@@ -47,6 +47,17 @@ func (r *Resolver) VisitClassStmt(classstmt Stmt) interface{} {
 
 	r.declare(class.name)
 	r.define(class.name)
+
+	// 循环依赖可以最后添加图检测环的算法
+	if class.superClass != nil &&
+		class.name.Lexeme == class.superClass.name.Lexeme {
+		Errors.LoxError(class.superClass.name,
+			"A class can't inherit from itself.")
+	}
+
+	if class.superClass != nil {
+		r.resolveExpr(class.superClass)
+	}
 	r.beginScope()
 	r.peek()["this"] = true
 

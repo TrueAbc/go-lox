@@ -46,6 +46,15 @@ func (i *Interpreter) VisitGetExpr(getexpr Expr) interface{} {
 
 func (i *Interpreter) VisitClassStmt(classstmt Stmt) interface{} {
 	class := classstmt.(*ClassStmt)
+	var superclass interface{}
+	if class.superClass != nil {
+		superclass = i.evaluate(class.superClass)
+		if _, ok := superclass.(*LoxClass); !ok {
+			panic(NewRuntimeError(class.superClass.name, ""+
+				"SuperClass must be a class"))
+		}
+	}
+
 	i.env.Define(class.name.Lexeme, nil)
 	methods := make(map[string]*LoxFunction)
 	for _, item := range class.methods {
@@ -54,7 +63,10 @@ func (i *Interpreter) VisitClassStmt(classstmt Stmt) interface{} {
 			fClass.name.Lexeme == "init")
 		methods[fClass.name.Lexeme] = function
 	}
-	klass := NewLoxClass(class.name.Lexeme, methods)
+	if superclass != nil {
+		superclass = superclass.(*LoxClass)
+	}
+	klass := NewLoxClass(class.name.Lexeme, methods, superclass)
 	i.env.Assign(class.name, klass)
 	return nil
 }

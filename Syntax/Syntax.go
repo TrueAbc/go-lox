@@ -187,3 +187,7 @@ operator       → "==" | "!=" | "<" | "<=" | ">" | ">="
 //assignment     → ( call "." )? IDENTIFIER "=" assignment
 //| logic_or ;
 //"Set      : Expr object, Token name, Expr value",
+
+// 包括继承关系的类声明
+// classDecl      → "class" IDENTIFIER ( "<" IDENTIFIER )?
+//                 "{" function* "}" ;

@@ -52,8 +52,9 @@ func (blockstmt *BlockStmt) Accept(visitor VisitorStmt) interface{} {
 }
 
 type ClassStmt struct {
-	name    *Token.Token
-	methods []Stmt
+	name       *Token.Token
+	superClass *VariableExpr
+	methods    []Stmt
 }
 
 func (classstmt *ClassStmt) Accept(visitor VisitorStmt) interface{} {

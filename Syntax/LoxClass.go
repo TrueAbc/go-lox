@@ -8,6 +8,8 @@ import (
 type LoxClass struct {
 	name    string
 	methods map[string]*LoxFunction
+
+	superClass *LoxClass
 }
 
 func (lc *LoxClass) FindMethod(name string) *LoxFunction {
@@ -38,8 +40,14 @@ func (lc *LoxClass) String() string {
 	return lc.name
 }
 
-func NewLoxClass(name string, methods map[string]*LoxFunction) *LoxClass {
-	return &LoxClass{name: name, methods: methods}
+func NewLoxClass(name string, methods map[string]*LoxFunction,
+	superClass interface{}) *LoxClass {
+	if superClass != nil {
+		return &LoxClass{name: name, methods: methods, superClass: superClass.(*LoxClass)}
+	} else {
+		superClass = nil
+		return &LoxClass{name: name, methods: methods, superClass: nil}
+	}
 }
 
 type LoxInstance struct {
@@ -53,6 +61,9 @@ func (li *LoxInstance) Get(token *Token.Token) interface{} {
 	}
 	if method := li.kClass.FindMethod(token.Lexeme); method != nil {
 		return method.Bind(li)
+	}
+	if li.kClass.superClass != nil {
+		return li.kClass.superClass.FindMethod(token.Lexeme)
 	}
 	Errors.LoxRuntimeError(token, "Undefined property '"+token.Lexeme+"'.")
 	return nil
